@@ -31,3 +31,34 @@ Power on the PLC
 ```bash
 python3 replay.py 192.168.1.100 power_on
 ````
+
+Power off the PLC
+
+```bash
+python3 replay.py 192.168.1.100 power_off
+````
+
+Activate a digital output (Example Q0.0)
+
+```bash
+python3 replay.py 192.168.1.100 modify Q0.0 on
+````
+
+Deactivate a digital output (Example Q0.0)
+
+```bash
+python3 replay.py 192.168.1.100 modify Q0.0 off
+````
+
+## Contributions
+
+If you want to improve this project, feel free to fork the repository and submit a pull request with your enhancements.
+
+## Disclaimer
+
+This project is intended for educational and auditing purposes in controlled environments only.
+It must not be used for malicious activities or on production systems without explicit authorization.
+
+## License
+
+This project is licensed under the MIT License.
