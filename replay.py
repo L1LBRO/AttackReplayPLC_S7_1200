@@ -2,107 +2,107 @@ import socket
 import sys
 
 # Terminal colors
-cColorRojo = '\033[1;31m'
-cColorVerde = '\033[1;32m'
-cColorAzul = '\033[1;34m'
-cFinColor = '\033[0m'
+colorRed = '\033[1;31m'
+colorGreen = '\033[1;32m'
+colorBlue = '\033[1;34m'
+colorEnd = '\033[0m'
 
-def mostrar_mensaje_inicial():
-    print(cColorAzul + "\n===============================" + cFinColor)
-    print(cColorVerde + "      ⚙️  Navigator Notice ⚙️" + cFinColor)
-    print(cColorAzul + "===============================" + cFinColor)
+def show_initial_message():
+    print(colorBlue + "\n===============================" + colorEnd)
+    print(colorGreen + "      ⚙️  Navigator Notice ⚙️" + colorEnd)
+    print(colorBlue + "===============================" + colorEnd)
     print("\nThese are the available options for the script:\n")
-    print(cColorVerde + "  - power_on   ➜ Turns on the PLC" + cFinColor)
-    print(cColorRojo + "  - power_off  ➜ Turns off the PLC" + cFinColor)
-    print(cColorVerde + "  - modify     ➜ Modifies the PLC outputs" + cFinColor)
+    print(colorGreen + "  - power_on   ➜ Turns on the PLC" + colorEnd)
+    print(colorRed + "  - power_off  ➜ Turns off the PLC" + colorEnd)
+    print(colorGreen + "  - modify     ➜ Modifies the PLC outputs" + colorEnd)
     print("\nUsage parameters:\n")
-    print("  " + cColorAzul + "python3 script.py [PLC IP] [option]" + cFinColor)
+    print("  " + colorBlue + "python3 script.py [PLC IP] [option]" + colorEnd)
     print("\nExample:")
     print("  python3 script.py 192.168.1.100 power_on")
     print("  python3 script.py 192.168.1.100 power_off")
     print("  python3 script.py 192.168.1.100 modify Q0.0 on")
-    print(cColorAzul + "\n===============================" + cFinColor + "\n")
+    print(colorBlue + "\n===============================" + colorEnd + "\n")
 
-def fConectar(pHost):
-    print(f"Trying to connect to {pHost} on port 102...")
-    vSocketPLC = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    vSocketPLC.settimeout(5)
+def connect_to_plc(host):
+    print(f"Trying to connect to {host} on port 102...")
+    plc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    plc_socket.settimeout(5)
     try:
-        vSocketPLC.connect((pHost, 102))
+        plc_socket.connect((host, 102))
         print("\n  Connection established.")
-        return vSocketPLC
+        return plc_socket
     except socket.error as e:
         print(f"\n  Error connecting to the PLC: {e}")
         return None
 
-def fModificarSalida(pHost, salida, estado):
-    vSocketPLC = fConectar(pHost)
-    if not vSocketPLC:
+def modify_output(host, output, state):
+    plc_socket = connect_to_plc(host)
+    if not plc_socket:
         return
 
-    vComando = {
+    command = {
         "on": '0300002502f08032010000001f000e00060501120a10010001000082000000000300010100',
         "off": '0300002502f08032010000001f000e00060501120a10010001000082000000000300010000'
     }
 
-    if estado not in vComando:
-        print(cColorRojo + "\n  Invalid state. Use 'on' or 'off'. \n" + cFinColor)
+    if state not in command:
+        print(colorRed + "\n  Invalid state. Use 'on' or 'off'. \n" + colorEnd)
         return
 
-    print(f"\n  Modifying output {salida} to state {estado}...\n")
-    fEnviarPayload(vComando[estado], vSocketPLC)
-    print(f"\n  Output {salida} modified successfully.\n")
-    vSocketPLC.close()
+    print(f"\n  Modifying output {output} to state {state}...\n")
+    send_payload(command[state], plc_socket)
+    print(f"\n  Output {output} modified successfully.\n")
+    plc_socket.close()
 
-def fEnviarPayload(pData, pSocket):
-    print(f"Trying to send: {pData}")
-    pSocket.send(bytearray.fromhex(pData))
+def send_payload(data, socket_conn):
+    print(f"Trying to send: {data}")
+    socket_conn.send(bytearray.fromhex(data))
     try:
-        vResp = pSocket.recv(1024)
-        if vResp:
-            print(f"\n  PLC response: {vResp.hex()} \n")
+        response = socket_conn.recv(1024)
+        if response:
+            print(f"\n  PLC response: {response.hex()} \n")
         else:
             print("\n  No response received from the PLC. \n")
-        return vResp
+        return response
     except socket.timeout:
         print("\n  Waited 5 seconds, but the PLC did not respond.")
         return None
 
-def fEncenderPLC(pHost):
-    vSocketPLC = fConectar(pHost)
-    if not vSocketPLC:
+def power_on_plc(host):
+    plc_socket = connect_to_plc(host)
+    if not plc_socket:
         return
     
-    vPayloadEncender = '0300004302f0807202003431000004f200000010000003ca3400000034019077000803000004e88969'
-    fEnviarPayload(vPayloadEncender, vSocketPLC)
+    payload_on = '0300004302f0807202003431000004f200000010000003ca3400000034019077000803000004e88969'
+    send_payload(payload_on, plc_socket)
     print("\n  PLC started successfully.\n")
-    vSocketPLC.close()
+    plc_socket.close()
 
-def fApagarPLC(pHost):
-    vSocketPLC = fConectar(pHost)
-    if not vSocketPLC:
+def power_off_plc(host):
+    plc_socket = connect_to_plc(host)
+    if not plc_socket:
         return
     
-    vPayloadApagar = '0300004302f0807202003431000004f200000010000003ca3400000034019077000801000004e88969'
-    fEnviarPayload(vPayloadApagar, vSocketPLC)
+    payload_off = '0300004302f0807202003431000004f200000010000003ca3400000034019077000801000004e88969'
+    send_payload(payload_off, plc_socket)
     print("\n  PLC stopped successfully.\n")
-    vSocketPLC.close()
+    plc_socket.close()
 
 if __name__ == "__main__":
-    mostrar_mensaje_inicial()
+    show_initial_message()
     if len(sys.argv) < 3:
-        print(cColorRojo + "\n  Incorrect usage. You must specify the PLC IP and the action to perform. \n" + cFinColor)
+        print(colorRed + "\n  Incorrect usage. You must specify the PLC IP and the action to perform. \n" + colorEnd)
         print("  Correct usage: python3 script.py [PLC_IP] [power_on|power_off|modify] [output] [on|off] \n")
     else:
-        vHost = sys.argv[1]
-        accion = sys.argv[2].lower()
-        if accion == "power_on":
-            fEncenderPLC(vHost)
-        elif accion == "power_off":
-            fApagarPLC(vHost)
-        elif accion == "modify" and len(sys.argv) == 5:
-            salida = sys.argv[3]
-            estado = sys.argv[4].lower()
-            fModificarSalida(vHost, salida, estado)
+        host = sys.argv[1]
+        action = sys.argv[2].lower()
+        if action == "power_on":
+            power_on_plc(host)
+        elif action == "power_off":
+            power_off_plc(host)
+        elif action == "modify" and len(sys.argv) == 5:
+            output = sys.argv[3]
+            state = sys.argv[4].lower()
+            modify_output(host, output, state)
         else:
-            print(cColorRojo + "\n  Invalid action or incorrect parameters. \n" + cFinColor)
+            print(colorRed + "\n  Invalid action or incorrect parameters. \n" + colorEnd)
