@@ -20,10 +20,7 @@ python3 replay.py [PLC_IP] [Action]
 ````
 
 Available actions
-
-power_on: Powers on the PLC
-
-power_off: Powers off the PLC
-
-modify [output] [on|off]: Changes the state of a PLC digital output
+ - power_on: Powers on the PLC
+ - power_off: Powers off the PLC
+ - modify [output] [on|off]: Changes the state of a PLC digital output
 
