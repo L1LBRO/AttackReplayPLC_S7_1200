@@ -24,3 +24,10 @@ Available actions
  - power_off: Powers off the PLC
  - modify [output] [on|off]: Changes the state of a PLC digital output
 
+## Examples
+
+Power on the PLC
+
+```bash
+python3 replay.py 192.168.1.100 power_on
+````
